@@ -11,8 +11,9 @@
 // constructor WITHOUT memory allocation
 ChatBot::ChatBot()
 {
+    std::cout << "ChatBot Constructor default" << std::endl;
+
     // invalidate data handles
-    _image = nullptr;
     _chatLogic = nullptr;
     _rootNode = nullptr;
 }
@@ -20,14 +21,14 @@ ChatBot::ChatBot()
 // constructor WITH memory allocation
 ChatBot::ChatBot(std::string filename)
 {
-    std::cout << "ChatBot Constructor" << std::endl;
+    std::cout << "ChatBot Constructor with filename" << std::endl;
     
     // invalidate data handles
     _chatLogic = nullptr;
     _rootNode = nullptr;
 
     // load image into heap memory
-    _image = new wxBitmap(filename, wxBITMAP_TYPE_PNG);
+    _image = std::make_unique<wxBitmap>(filename, wxBITMAP_TYPE_PNG);
 }
 
 ChatBot::~ChatBot()
@@ -35,11 +36,11 @@ ChatBot::~ChatBot()
     std::cout << "ChatBot Destructor" << std::endl;
 
     // deallocate heap memory
-    if(_image != NULL) // Attention: wxWidgets used NULL and not nullptr
-    {
-        delete _image;
-        _image = NULL;
-    }
+//    if(_image != NULL) // Attention: wxWidgets used NULL and not nullptr
+//    {
+//        delete _image;
+//        _image = NULL;
+//    }
 }
 
 //// STUDENT CODE
@@ -52,18 +53,25 @@ ChatBot::ChatBot(const ChatBot& source) {
 	_currentNode = source._currentNode;
 	_rootNode = source._rootNode;
 	_chatLogic = source._chatLogic;
-
-	_image = new wxBitmap(source.GetImageHandle());
+	_image = std::make_unique<wxBitmap>(*(source.GetImageHandle()));
 }
+
 ChatBot::ChatBot(ChatBot&& source) {
 	std::cout << "ChatBot Move Constructor" << std::endl;
 
 	// move
-
+	_currentNode = source._currentNode;
+	_rootNode = source._rootNode;
+	_chatLogic = source._chatLogic;
+	_image = std::move(source._image);
 
 	// source nullify
+	source._currentNode = nullptr;
+	source._rootNode = nullptr;
+	source._chatLogic = nullptr;
 }
-ChatBot::ChatBot& operator=(const ChatBot& source) {
+
+ChatBot& ChatBot::operator=(const ChatBot& source) {
 	std::cout << "ChatBot Copy Assignment Operator" << std::endl;
 
 	// check if this
@@ -71,15 +79,16 @@ ChatBot::ChatBot& operator=(const ChatBot& source) {
 		return *this;
 	}
 
-	// remove current
-	if(_image != NULL) {
-			delete _image;
-			_image = NULL;
-	}
-	
 	// copy
+	_currentNode = source._currentNode;
+	_rootNode = source._rootNode;
+	_chatLogic = source._chatLogic;
+	_image = std::make_unique<wxBitmap>(*(source.GetImageHandle()));
+	
+	return *this;
 }
-ChatBot::ChatBot& operator=(ChatBot&& source) {
+
+ChatBot& ChatBot::operator=(ChatBot&& source) {
 	std::cout << "ChatBot Move Assignment Operator" << std::endl;
 
 	// check if this
@@ -87,16 +96,18 @@ ChatBot::ChatBot& operator=(ChatBot&& source) {
 		return *this;
 	}
 
-	// remove current
-	if(_image != NULL) {
-			delete _image;
-			_image = NULL;
-	}
-
 	// move
-	_image
+	_currentNode = source._currentNode;
+	_rootNode = source._rootNode;
+	_chatLogic = source._chatLogic;
+	_image = std::move(source._image);
 
 	// source nullify
+	source._currentNode = nullptr;
+	source._rootNode = nullptr;
+	source._chatLogic = nullptr;
+
+	return *this;
 }
 
 ////
